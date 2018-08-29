@@ -1,0 +1,139 @@
+
+Task1: Leftjoin in Scala
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+
+
+import scala.io.Source
+
+object leftjoin {
+  
+  def main(args: Array[String]){
+
+        val ep_file = Source.fromFile("employee_pay.csv")
+
+        val linesof = ep_file.getLines
+
+        var rf_map = Map("id" -> "salary,bonus")
+        
+        for(line <- linesof){
+
+          val rf_line = line.split(",",2)
+          rf_map += (rf_line(0) -> rf_line(1))
+        }
+          
+        val emp_name_file = Source.fromFile("employee_names.csv")
+        
+        val leftside_linesof = emp_name_file.getLines
+        
+        for(line1 <- leftside_linesof){
+          
+          val emp_name_file_line = line1.split(",",2)
+          val temp_variable = rf_map(emp_name_file_line(0))
+          println(line1 + "," + temp_variable)
+        }
+        
+  }
+
+}
+
+
+Task2: In java
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// Names_Mapper.java 
+---------------------
+
+	
+
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException{
+
+		//Splitting the data in key pair values 
+
+		String[] item = value.toString().split(",",2);
+
+		context.write(new Text(item[0]), new Text(item[1]));
+
+	}
+
+	
+
+Salary_Mapper.java 
+----------------------
+
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException{
+
+		
+
+		//Splitting the given data in key pair value
+
+		String[] item = value.toString().split(",",2);
+
+		context.write(new Text(item[0]), new Text(item[1]));	
+
+	}
+
+Reducer.java
+-----------------
+
+public void reduce(Text key, Iterable<Text> value, Context context) throws IOException, InterruptedException{
+
+	
+		String firstnLastname = null;
+
+		String Bonus = null;
+
+		
+
+		//Iterate though all key pair value 
+
+		for(Text variable: value) {
+
+			name = variable.toString().subString(1);		
+
+			salary = variable.toString().subString(1);	
+
+		}
+
+		
+
+		// If first name and last name dono't match
+
+		if(firstnLastname != null)
+
+			context.write(new Text(key), new Text(firstnLastname + "," + Bonus));	
+
+	}
+
+	
+
+Driver class 
+
+Employee.java
+--------------
+
+		Configuration config = new Configuration();
+
+		Job new_job = new Job(config, "Employee");
+
+		new_job.setJarByClass(Employee.class);
+
+		new_job.setJobName("Employee");
+
+		new_job.setMapperClass(Name_Mapper.class);
+
+		new_job.setMapOutputKeyClass(Text.class);
+
+		new_job.setMapOutputValueClass(Text.class);
+
+		new_job.setMapperClass(Salary_Mapper.class);
+
+		new_job.setMapOutputKeyClass(Text.class);
+
+		new_job.setMapOutputValueClass(Text.class);
+
+		new_job.setReducerClass(Reducer.class);
+
+		new_job.setOutputKeyClass(Text.class);
+
+		new_job.setOutputValueClass(Text.class);
+
